@@ -1,6 +1,7 @@
+import argparse
 import os
 
-from pinentry_rofi import __version__, handle_command, parse_request, rofi_init_args
+from pinentry_rofi import __version__, add_args, handle_args, handle_command, handle_request, rofi_init_args
 
 
 assuan_action_mapping = {
@@ -59,7 +60,7 @@ assuan_action_mapping = {
 def test_pinenntry(capsys):
     rofi_args = rofi_init_args.copy()
     for request, etalon in assuan_action_mapping.items():
-        action, arg = parse_request(request)
+        action, arg = handle_request(request)
         # with pytest.raises(SystemExit):
         try:
             rofi_args = handle_command(action, arg, rofi_args, is_test=True)
@@ -69,3 +70,38 @@ def test_pinenntry(capsys):
             assert etalon_rofi_args == rofi_args
         captured = capsys.readouterr()
         assert f"{etalon['out']}\n" == captured.out, f'Error in request: {request}'
+
+
+def test_args(mocker):
+    etalon_rofi_args = {'-dmenu': '', '-input': '/dev/null', '-password': '', '-disable-history': '', '-mesg': '',
+                        '-l': '0', '-display': ':1', '-p': 'custom_prompt'}
+    mocker.patch(
+        "sys.argv",
+        [
+            "pinentry_rofi.py",
+            "--display",
+            ":1",
+            "--prompt",
+            "custom_prompt",
+        ],
+    )
+
+    test_arg_parser = argparse.ArgumentParser('pinentry_rofi.py')
+    add_args(test_arg_parser)
+    rofi_args = handle_args(test_arg_parser)
+
+    assert etalon_rofi_args == rofi_args
+
+
+def test_env_args(mocker):
+    etalon_rofi_args = {'-dmenu': '', '-input': '/dev/null', '-password': '', '-disable-history': '', '-mesg': '',
+                        '-l': '0', '-display': ':1', '-p': 'custom_prompt'}
+    os.environ['DISPLAY'] = ':1'
+    os.environ['PINENTRY_USER_DATA'] = 'custom_prompt'
+    mocker.patch("sys.argv", ["pinentry_rofi.py"])
+
+    test_arg_parser = argparse.ArgumentParser('pinentry_rofi.py')
+    add_args(test_arg_parser)
+    rofi_args = handle_args(test_arg_parser)
+
+    assert etalon_rofi_args == rofi_args

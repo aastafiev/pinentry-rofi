@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pinentry-rofi"
-version = "0.1.0"
+version = "0.1.1"
 description = "rofi pinentry"
 authors = ["Aleksey Astafiev <aastafiev@gmail.com>"]
 license = "GPL-3"
@@ -16,6 +16,7 @@ flake8-builtins = "^2.2.0"
 flake8-commas = "^2.1.0"
 flake8-import-order = "^0.18.2"
 pytest = "^7.4.3"
+pytest-mock = "^3.12.0"
 
 [build-system]
 requires = ["poetry-core"]

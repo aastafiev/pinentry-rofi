@@ -11,7 +11,7 @@ from typing import Optional, Tuple
 from gi.repository import GLib
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 rofi_init_args = {'-dmenu': '', '-input': '/dev/null', '-password': '', '-disable-history': '', '-mesg': '', '-l': '0'}
 
@@ -77,7 +77,7 @@ def handle_command(action: str, arg: Optional[str], rofi_args: dict, *, is_test:
     return rofi_args
 
 
-def parse_request(line: str) -> Tuple[str, Optional[str]]:
+def handle_request(line: str) -> Tuple[str, Optional[str]]:
     line_spl = line.rstrip('\n').split(None, 1)
     if len(line_spl) == 2:
         action, arg = line_spl
@@ -86,11 +86,27 @@ def parse_request(line: str) -> Tuple[str, Optional[str]]:
     return action, arg
 
 
+def add_args(parser: argparse.ArgumentParser):
+    parser.add_argument('-d', '--display', default=os.getenv('DISPLAY', ':0'), type=str,
+                        help='Set display, default is ":0"')
+    parser.add_argument('-p', '--prompt', default=os.getenv('PINENTRY_USER_DATA'), type=str,
+                        help='Set rofi prompt, default takes from PINENTRY_USER_DATA environment variable.'
+                             ' If environment variable not set, uses SETPROMPT argument.')
+
+
+def handle_args(arg_parser: Optional[argparse.ArgumentParser] = None):
+    args = arg_parser.parse_args()
+    rofi_args = {**rofi_init_args, '-display': args.display}
+    if args.prompt:
+        rofi_args['-p'] = args.prompt
+    return rofi_args
+
+
 def pinentry(rofi_args: list = None):
     rofi_args = rofi_args or rofi_init_args
     assuan_send('OK Please go ahead')
     for line in sys.stdin:
-        action, arg = parse_request(line)
+        action, arg = handle_request(line)
         handle_command(action, arg, rofi_args)
 
 
@@ -108,15 +124,6 @@ INSTALL.
    `pinentry-program <HOME>/.local/bin/pinentry_rofi.py`
 4. Restart gpg-agent `gpgconf --kill gpg-agent`''',
     )
-    parser.add_argument('-d', '--display', default=os.getenv('DISPLAY', ':0'), type=str,
-                        help='Set display, default is ":0"')
-    parser.add_argument('-p', '--prompt', default=os.getenv('PINENTRY_USER_DATA'), type=str,
-                        help='Set rofi prompt, default takes from PINENTRY_USER_DATA environment variable.'
-                             ' If environment variable not set, uses SETPROMPT argument.')
-
-    args = parser.parse_args()
-
-    rofi_base_args = {**rofi_init_args, '-display': args.display}
-    if args.prompt:
-        rofi_base_args['-p'] = args.prompt
-    pinentry(rofi_base_args)
+    add_args(parser)
+    rofi_args = handle_args(parser)
+    pinentry(rofi_args)
