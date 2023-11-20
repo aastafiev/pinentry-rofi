@@ -11,7 +11,7 @@ from typing import Optional, Tuple
 from gi.repository import GLib
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 rofi_init_args = {'-dmenu': '', '-input': '/dev/null', '-password': '', '-disable-history': '', '-mesg': '', '-l': '0'}
 
@@ -71,9 +71,13 @@ def handle_command(action: str, arg: Optional[str], rofi_args: dict, *, is_test:
     elif action == 'BYE':
         pass
     else:
+        ok = False
+
+    if ok:
+        assuan_send('OK')
+    else:
         assuan_send('BYE')
         exit(1)
-    ok and assuan_send('OK')
     return rofi_args
 
 
