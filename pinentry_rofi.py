@@ -11,7 +11,7 @@ from typing import Optional, Tuple
 from gi.repository import GLib
 
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 rofi_init_args = {'-dmenu': '', '-input': '/dev/null', '-password': '', '-disable-history': '', '-mesg': '', '-l': '0'}
 
@@ -123,7 +123,7 @@ A simple pinentry program using rofi
 INSTALL.
 
 1. Copy `python_rofi.py` to your `~/.local/bin`
-2. `chmod +x ~/.local/bin/python_rofi.py`
+2. `chmod +x ~/.local/bin/pinentry_rofi.py`
 3. Set `pinentry-program` in `~/.gnupg/gpg-agent.conf`. For example:
    `pinentry-program <HOME>/.local/bin/pinentry_rofi.py`
 4. Restart gpg-agent `gpgconf --kill gpg-agent`''',
